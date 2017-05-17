@@ -1,9 +1,11 @@
 package it.polito.tdp.porto.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.UndirectedGraph;
+import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
 
@@ -17,6 +19,7 @@ public class Model {
 	private List<Author> autori;
 	private AuthorIdMap authorIdMap;
 	private PaperIdMap paperIdMap;
+	private DijkstraShortestPath<Author,DefaultEdge> dijkstra;
 	
 	public	Model() {
 	}
@@ -60,6 +63,37 @@ public class Model {
 	  this.getGrafo();
 	  return Graphs.neighborListOf(graph, a);
 		
+	}
+
+	public List<Paper> getSequenza(Author a1, Author a2) {
+		dijkstra=new DijkstraShortestPath<Author,DefaultEdge>(graph, a1, a2);
+		PortoDAO dao=new PortoDAO();
+		List<Paper> ptemp= new ArrayList<Paper>();
+		for(DefaultEdge e:dijkstra.getPathEdgeList()){
+			boolean trovato=false;
+			for(Paper p1:graph.getEdgeSource(e).getArticoli()){
+				while(trovato==false){
+				for(Paper p2:graph.getEdgeTarget(e).getArticoli()){
+					while(trovato==false){
+					if(p1.equals(p2)){
+						ptemp.add(p1);
+						trovato=true;
+					}
+				}
+				}
+			}
+			}
+			
+			
+		}
+		return ptemp;
+	}
+
+	public List<Author> getAutoriRimanenti(Author autore) {
+		List<Author> ltemp=new ArrayList(this.getAutori());
+		ltemp.remove(autore);
+		ltemp.removeAll(this.trovaCoautori(autore));
+		return ltemp;
 	}
 	
 	

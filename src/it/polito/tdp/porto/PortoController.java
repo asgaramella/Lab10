@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 
 import it.polito.tdp.porto.model.Author;
 import it.polito.tdp.porto.model.Model;
+import it.polito.tdp.porto.model.Paper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -23,7 +24,7 @@ public class PortoController {
     private ComboBox<Author> boxPrimo;
 
     @FXML
-    private ComboBox<?> boxSecondo;
+    private ComboBox<Author> boxSecondo;
 
     @FXML
     private TextArea txtResult;
@@ -35,6 +36,9 @@ public class PortoController {
     		
     		for(Author atemp:model.trovaCoautori(autore))
     			txtResult.appendText(atemp.toString()+"\n");
+    		
+    		boxSecondo.getItems().clear();
+    		boxSecondo.getItems().addAll(model.getAutoriRimanenti(autore));
     	}
     	else
     		txtResult.appendText("Inserire autore! \n");
@@ -44,7 +48,14 @@ public class PortoController {
 
     @FXML
     void handleSequenza(ActionEvent event) {
-
+    	Author a1=boxPrimo.getValue();
+    	Author a2=boxSecondo.getValue();
+    	if(a1!=null && a2!=null){
+    	for(Paper ptemp:model.getSequenza (a1, a2))
+    		txtResult.appendText(ptemp.toString()+"\n");
+    			
+    			
+    	}
     }
 
     @FXML
