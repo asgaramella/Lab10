@@ -2,6 +2,7 @@ package it.polito.tdp.porto.model;
 
 import java.util.List;
 
+import org.jgrapht.Graphs;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
@@ -38,6 +39,21 @@ public class Model {
 	public void creaGrafo(){
 		this.graph = new SimpleGraph<>(DefaultEdge.class) ;
 		
+		PortoDAO dao=new PortoDAO();
+		Graphs.addAllVertices(graph, this.getAutori());
+		
+		for(Author autore:graph.vertexSet()){
+			for(Author coautore:dao.getCoautori(autore)){
+				graph.addEdge(autore, coautore);
+			}
+		}
+		
+		
+	}
+	
+	public List<Author> trovaCoautori(Author a){
+	  this.getGrafo();
+	  return Graphs.neighborListOf(graph, a);
 		
 	}
 	

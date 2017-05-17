@@ -3,6 +3,7 @@ package it.polito.tdp.porto;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.porto.model.Author;
 import it.polito.tdp.porto.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,7 +20,7 @@ public class PortoController {
     private URL location;
 
     @FXML
-    private ComboBox<?> boxPrimo;
+    private ComboBox<Author> boxPrimo;
 
     @FXML
     private ComboBox<?> boxSecondo;
@@ -29,6 +30,15 @@ public class PortoController {
 
     @FXML
     void handleCoautori(ActionEvent event) {
+    	Author autore=boxPrimo.getValue();
+    	if(autore!=null){
+    		
+    		for(Author atemp:model.trovaCoautori(autore))
+    			txtResult.appendText(atemp.toString()+"\n");
+    	}
+    	else
+    		txtResult.appendText("Inserire autore! \n");
+    	
 
     }
 
@@ -47,6 +57,6 @@ public class PortoController {
 
 	public void setModel(Model model) {
 		this.model=model;
-		
+		boxPrimo.getItems().addAll(model.getAutori());
 	}
 }

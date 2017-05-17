@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.polito.tdp.country.model.Country;
-import it.polito.tdp.db.DBConnect;
+
+
 import it.polito.tdp.porto.model.Author;
 import it.polito.tdp.porto.model.Paper;
 
@@ -66,29 +66,28 @@ public class PortoDAO {
 
 		} catch (SQLException e) {
 			 e.printStackTrace();
-			throw new RuntimeException("Errore Db");
-		}
+			throw new RuntimeException("Errore Db");                    
+		}                         
 	}
 
+	
 	public List<Author> listAutori() {
-		final String sql = "SELECT CCode, StateAbb, StateNme FROM country ORDER BY CCode ASC";
+		final String sql ="SELECT * "+
+				"FROM author ORDER BY lastname";
 
-		try {
+                                                                                 
+		try {                                                           
 			Connection conn = DBConnect.getConnection();
-			PreparedStatement st = conn.prepareStatement(sql);
-			
+			PreparedStatement st = conn.prepareStatement(sql);                               
+			                                                                                                                         
 			ResultSet res = st.executeQuery() ;
 			
 			List<Author> list = new ArrayList<>() ;
 			
 			while(res.next()) {
-				list.add(new Country(res.getInt("CCode"), res.getString("StateAbb"), res.getString("StateNme"))) ;
+				list.add(new Author(res.getInt("id"), res.getString("lastname"), res.getString("firstname"))) ;
 				
-				//II versione con controllo ogg già esistenti
 				
-				//Country c=new Country(res.getInt("CCode"), res.getString("StateAbb"), res.getString("StateNme"));
-				//c=countryIdMap.put(c);
-				//list.add(c);
 			
 			}
 			
@@ -101,8 +100,49 @@ public class PortoDAO {
 			e.printStackTrace();
 			return null ;
 		}
+	}
+	
+	public List<Author> getCoautori(Author autore) {
+			final String sql ="SELECT DISTINCT author.id,author.lastname,author.firstname "+
+					"from creator,author "+
+					"WHERE author.id=creator.authorid && creator.eprintid IN (select cc.eprintid "+
+					"FROM creator as cc "+
+					"WHERE cc.authorid=?)";
+
+	                                                                                 
+			try {                                                           
+				Connection conn = DBConnect.getConnection();
+				PreparedStatement st = conn.prepareStatement(sql);  
+				
+				st.setInt(1, autore.getId());
+				                                                                                                                         
+				ResultSet res = st.executeQuery() ;
+				
+				List<Author> list = new ArrayList<>() ;
+				
+				while(res.next()) {
+					list.add(new Author(res.getInt("author.id"), res.getString("author.lastname"), res.getString("author.firstname"))) ;
+					
+					
+				
+				}
+				
+				list.remove(autore);
+				res.close();
+				conn.close();
+				
+				return list ;
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null ;
+			}
+
+			
+		}
+
+	}                                                                        
+		
 
 		
-		return null;
-	}
-}
+	
