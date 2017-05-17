@@ -17,8 +17,8 @@ public class Model {
 	
 	private UndirectedGraph<Author,DefaultEdge> graph;
 	private List<Author> autori;
-	private AuthorIdMap authorIdMap;
-	private PaperIdMap paperIdMap;
+	private AuthorIdMap authorIdMap=new AuthorIdMap();
+	private PaperIdMap paperIdMap=new PaperIdMap();
 	private DijkstraShortestPath<Author,DefaultEdge> dijkstra;
 	
 	public	Model() {
@@ -72,20 +72,22 @@ public class Model {
 		for(DefaultEdge e:dijkstra.getPathEdgeList()){
 			boolean trovato=false;
 			for(Paper p1:graph.getEdgeSource(e).getArticoli()){
-				while(trovato==false){
+				if(trovato==true){
+					break;
+				}
 				for(Paper p2:graph.getEdgeTarget(e).getArticoli()){
-					while(trovato==false){
 					if(p1.equals(p2)){
 						ptemp.add(p1);
 						trovato=true;
+						break;
 					}
 				}
 				}
 			}
-			}
 			
 			
-		}
+			
+		
 		return ptemp;
 	}
 
