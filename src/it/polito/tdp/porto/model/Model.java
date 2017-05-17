@@ -15,6 +15,8 @@ public class Model {
 	
 	private UndirectedGraph<Author,DefaultEdge> graph;
 	private List<Author> autori;
+	private AuthorIdMap authorIdMap;
+	private PaperIdMap paperIdMap;
 	
 	public	Model() {
 	}
@@ -22,7 +24,10 @@ public class Model {
 	public List<Author> getAutori(){
 		if(this.autori==null){
 			PortoDAO dao=new PortoDAO();
-			this.autori=dao.listAutori();
+			this.autori=dao.listAutori(authorIdMap);
+			for(Author a: autori){
+				dao.getArticoliDiAutore(a,paperIdMap);
+			}
 		}
 		return this.autori;
 	}
@@ -43,7 +48,7 @@ public class Model {
 		Graphs.addAllVertices(graph, this.getAutori());
 		
 		for(Author autore:graph.vertexSet()){
-			for(Author coautore:dao.getCoautori(autore)){
+			for(Author coautore:dao.getCoautori(autore,authorIdMap)){
 				graph.addEdge(autore, coautore);
 			}
 		}
@@ -56,5 +61,7 @@ public class Model {
 	  return Graphs.neighborListOf(graph, a);
 		
 	}
+	
+	
 	
 }

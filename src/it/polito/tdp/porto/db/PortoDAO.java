@@ -10,7 +10,9 @@ import java.util.List;
 
 
 import it.polito.tdp.porto.model.Author;
+import it.polito.tdp.porto.model.AuthorIdMap;
 import it.polito.tdp.porto.model.Paper;
+import it.polito.tdp.porto.model.PaperIdMap;
 
 public class PortoDAO {
 
@@ -71,7 +73,7 @@ public class PortoDAO {
 	}
 
 	
-	public List<Author> listAutori() {
+	public List<Author> listAutori(AuthorIdMap authorIdMap) {
 		final String sql ="SELECT * "+
 				"FROM author ORDER BY lastname";
 
@@ -85,9 +87,13 @@ public class PortoDAO {
 			List<Author> list = new ArrayList<>() ;
 			
 			while(res.next()) {
-				list.add(new Author(res.getInt("id"), res.getString("lastname"), res.getString("firstname"))) ;
+				Author a= authorIdMap.get(res.getInt("id"));
+				if(a==null){
+				a = new Author(res.getInt("id"), res.getString("lastname"), res.getString("firstname")) ;
+				a = authorIdMap.put(a);
+				}
 				
-				
+				list.add(a);
 			
 			}
 			
@@ -102,7 +108,7 @@ public class PortoDAO {
 		}
 	}
 	
-	public List<Author> getCoautori(Author autore) {
+	public List<Author> getCoautori(Author autore, AuthorIdMap authorIdMap) {
 			final String sql ="SELECT DISTINCT author.id,author.lastname,author.firstname "+
 					"from creator,author "+
 					"WHERE author.id=creator.authorid && creator.eprintid IN (select cc.eprintid "+
@@ -121,9 +127,13 @@ public class PortoDAO {
 				List<Author> list = new ArrayList<>() ;
 				
 				while(res.next()) {
-					list.add(new Author(res.getInt("author.id"), res.getString("author.lastname"), res.getString("author.firstname"))) ;
 					
-					
+					Author a= authorIdMap.get(res.getInt("id"));
+					if(a==null){
+					a = new Author(res.getInt("id"), res.getString("lastname"), res.getString("firstname")) ;
+					a = authorIdMap.put(a);
+					}
+					list.add(a);
 				
 				}
 				
@@ -140,6 +150,52 @@ public class PortoDAO {
 
 			
 		}
+
+	public void getArticoliDiAutore(Author a, PaperIdMap paperIdMap) {
+		final String sql ="SELECT paper.eprintid, paper.title, paper.issn, paper.publication, paper.`type`, paper.types "+
+				"from creator,paper "+
+				"WHERE paper.eprintid=creator.eprintid &&  creator.authorid=?";
+
+                                                                                 
+		try {                                                           
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);  
+			
+			st.setInt(1, a.getId());
+			                                                                                                                         
+			ResultSet rs = st.executeQuery() ;
+			
+			
+			while(rs.next()) {
+				
+				
+				
+				Paper paper=paperIdMap.get(rs.getInt("paper.eprintid"));
+				if(paper==null){
+					paper=new Paper(rs.getInt("eprintid"), rs.getString("title"), rs.getString("issn"),
+							rs.getString("publication"), rs.getString("type"), rs.getString("types"));
+					paper= paperIdMap.put(paper);
+				}
+				
+				a.getArticoli().add(paper);
+			
+			
+			}
+			
+		
+			rs.close();
+			conn.close();
+			
+		
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
+
+		
+		
+	}
 
 	}                                                                        
 		
