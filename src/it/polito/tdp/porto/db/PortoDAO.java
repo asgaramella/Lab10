@@ -115,6 +115,8 @@ public class PortoDAO {
 				PreparedStatement st = conn.prepareStatement(sql);  
 				
 				st.setInt(1, autore.getId());
+			
+				
 				                                                                                                                         
 				ResultSet res = st.executeQuery() ;
 				
@@ -140,6 +142,50 @@ public class PortoDAO {
 
 			
 		}
+	
+	
+	public Paper getArticolo(Author a1,Author a2) {
+		final String sql ="SELECT paper.eprintid, paper.title, paper.issn, paper.publication, paper.`type`, paper.types "+
+				"from creator,paper "+
+				"WHERE paper.eprintid=creator.eprintid &&  creator.authorid=? && creator.eprintid IN (select cc.eprintid "+
+				"FROM creator as cc "+
+				 "WHERE cc.authorid=?)";
+
+
+                                                                                 
+		try {                                                           
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);  
+			
+			st.setInt(1, a1.getId());
+			st.setInt(2, a2.getId());
+			                                                                                                                         
+			ResultSet rs = st.executeQuery() ;
+			
+			Paper paper=null;
+			
+			if(rs.next()) {
+			 paper = new Paper(rs.getInt("paper.eprintid"), rs.getString("paper.title"), rs.getString("paper.issn"),
+						rs.getString("paper.publication"), rs.getString("paper.type"), rs.getString("paper.types"));
+			 System.out.println(paper.toString());
+				
+				
+			
+			}
+			rs.close();
+			conn.close();
+			return paper;
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+
+		
+	}
+	
+	
 
 	}                                                                        
 		
