@@ -102,7 +102,7 @@ public class PortoDAO {
 			
 			return list ;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
 			return null ;
 		}
