@@ -15,11 +15,11 @@ import it.polito.tdp.porto.db.PortoDAO;
 
 public class Model {
 	
-	private UndirectedGraph<Author,DefaultEdge> graph;
+	private UndirectedGraph<Author,Link> graph;
 	private List<Author> autori;
 	private AuthorIdMap authorIdMap=new AuthorIdMap();
 	private PaperIdMap paperIdMap=new PaperIdMap();
-	private DijkstraShortestPath<Author,DefaultEdge> dijkstra;
+	private DijkstraShortestPath<Author,Link> dijkstra;
 	
 	public	Model() {
 	}
@@ -35,7 +35,7 @@ public class Model {
 		return this.autori;
 	}
 	
-	private UndirectedGraph<Author, DefaultEdge> getGrafo(){
+	private UndirectedGraph<Author, Link> getGrafo(){
 		//affinchè grafo sia nullo new graph nel metodo di creazione e non nel costruttore di model!
 		if(this.graph==null){
 			this.creaGrafo();
@@ -45,18 +45,33 @@ public class Model {
 	}
 	
 	public void creaGrafo(){
-		this.graph = new SimpleGraph<>(DefaultEdge.class) ;
+		this.graph = new SimpleGraph<>(Link.class) ;
 		
 		PortoDAO dao=new PortoDAO();
 		Graphs.addAllVertices(graph, this.getAutori());
 		
 		for(Author autore:graph.vertexSet()){
 			for(Author coautore:dao.getCoautori(autore,authorIdMap)){
-				graph.addEdge(autore, coautore);
+				Link ltemp=graph.addEdge(autore, coautore);
+				if(ltemp!=null){
+				boolean trovato=false;
+				for(Paper p1:autore.getArticoli()){
+					if(trovato==true){
+						break;
+					}
+					for(Paper p2:coautore.getArticoli()){
+						if(p1.equals(p2)){
+							ltemp.setArticolo(p1);
+							trovato=true;
+							break;
+						}
+					}
 			}
+		}
 		}
 		
 		
+	}
 	}
 	
 	public List<Author> trovaCoautori(Author a){
@@ -66,30 +81,20 @@ public class Model {
 	}
 
 	public List<Paper> getSequenza(Author a1, Author a2) {
-		dijkstra=new DijkstraShortestPath<Author,DefaultEdge>(graph, a1, a2);
-		PortoDAO dao=new PortoDAO();
+		dijkstra=new DijkstraShortestPath<Author,Link>(graph, a1, a2);
 		List<Paper> ptemp= new ArrayList<Paper>();
-		for(DefaultEdge e:dijkstra.getPathEdgeList()){
-			boolean trovato=false;
-			for(Paper p1:graph.getEdgeSource(e).getArticoli()){
-				if(trovato==true){
-					break;
+		for(Link l:dijkstra.getPathEdgeList()){
+				ptemp.add(l.getArticolo());
+				
 				}
-				for(Paper p2:graph.getEdgeTarget(e).getArticoli()){
-					if(p1.equals(p2)){
-						ptemp.add(p1);
-						trovato=true;
-						break;
-					}
+		return ptemp;
 				}
-				}
-			}
+			
 			
 			
 			
 		
-		return ptemp;
-	}
+	
 
 	public List<Author> getAutoriRimanenti(Author autore) {
 		List<Author> ltemp=new ArrayList(this.getAutori());
