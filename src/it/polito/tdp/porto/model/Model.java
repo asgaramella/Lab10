@@ -53,6 +53,7 @@ public class Model {
 		for(Author autore:graph.vertexSet()){
 			for(Author coautore:dao.getCoautori(autore,authorIdMap)){
 				Link ltemp=graph.addEdge(autore, coautore);
+				//occhio quando usi subito dopo creazione l'arco se già esistente nel caso del grafo semplice ti resituisce null !!!
 				if(ltemp!=null){
 				boolean trovato=false;
 				for(Paper p1:autore.getArticoli()){
